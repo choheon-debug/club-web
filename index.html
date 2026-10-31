@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>우리 모임</title>
+<meta name="description" content="총무 혼자 쓰는 모임 일정·참석·회비 관리">
+<meta name="theme-color" content="#2563EB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="우리 모임">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="gowun-batang-bold.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Gowun Batang";font-weight:700;font-display:swap;src:url(gowun-batang-bold.woff2) format("woff2")}
+/* 컬러풀: 파랑→남색 머리띠와 저장 버튼, 초록 오늘 카드, 주홍 문자 버튼, 블루그레이 바탕 */
+:root{
+  --bg:#f0f1fa; --bg-grad:linear-gradient(180deg,#eceff9 0%,#f3f1fb 55%,#f9f7fd 100%);
+  --surface:#fff; --ink:#1f1d33; --muted:#6c6a86; --line:#e3e4f2;
+  --accent:#4f46e5; --on-accent:#fff; --container:#e0e7ff; --on-container:#1e1b6b;
+  --head:linear-gradient(120deg,#2563eb,#4f46e5); --head-shadow:rgb(79 70 229 / .28);
+  --grad:linear-gradient(120deg,#2563eb,#4f46e5); --grad-shadow:rgb(79 70 229 / .3);
+  --sms:linear-gradient(120deg,#f97316,#ef4444); --sms-shadow:rgb(239 68 68 / .3);
+  --sms-week:linear-gradient(120deg,#a855f7,#9333ea); --sms-week-shadow:rgb(147 51 234 / .3);
+  --hero:linear-gradient(120deg,#22c55e,#16a34a); --hero-ink:#fff; --hero-shadow:0 8px 22px rgb(22 163 74 / .3); --hero-a:#bbf7d0;
+  --week-bg:#f3e8ff; --week-fg:#6b21a8; --day-bg:#ffedd5; --day-fg:#9a3412;
+  --plain-bg:#e0e7ff; --plain-fg:#3730a3; --over-bg:#e9e9f1; --over-fg:#4b4b63;
+  --danger:#ba1a1a; --ok:#15803d; --scrim:rgb(31 29 51 / .42);
+  --av1:#ffedd5; --av2:#f3e8ff; --av3:#e0e7ff; --av4:#dcfce7; --av-ink:#2e2a4a;
+  --shadow:0 3px 12px rgb(60 60 140 / .08);
+  --display:"Gowun Batang","AppleMyungjo","Nanum Myeongjo",serif;
+  --body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+/* 휴대폰이 어두운 모드여도 항상 밝은 화면으로 보여 준다 */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-text-size-adjust:100%}
+body{min-height:100dvh;overscroll-behavior-y:none}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--bg-grad)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.appbar{background:var(--head);color:#fff;border-radius:0 0 24px 24px;box-shadow:0 8px 20px var(--head-shadow);
+  padding:calc(env(safe-area-inset-top,0px) + 6px) max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px))}
+.appbar .topbar{max-width:560px;margin:0 auto}
+.page{max-width:560px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 110px) max(16px,env(safe-area-inset-left,0px))}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 2px}
+.topbar h1{flex:1;margin:0;font-family:var(--display);font-size:1.5rem;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:0;background:rgb(255 255 255 / .22);display:grid;place-items:center;color:#fff;flex:none}
+.iconbtn svg{width:22px;height:22px}
+
+.hero{border-radius:24px;padding:18px 20px;background:var(--hero);color:var(--hero-ink);box-shadow:var(--hero-shadow);display:flex;flex-direction:column;gap:3px}
+.hero .k{font-size:.82rem;opacity:.85}
+.hero .v{font-family:var(--display);font-size:1.75rem;font-weight:700}
+.hero .s{margin-top:6px;font-size:.82rem}
+
+.banner{margin-top:12px;border-radius:18px;background:var(--surface);box-shadow:var(--shadow);padding:13px 14px;display:flex;gap:10px;align-items:center;font-size:.86rem;line-height:1.45}
+.banner p{margin:0;flex:1}
+.banner .x{border:0;background:none;color:var(--muted);font-size:1.1rem;padding:4px 6px}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;padding:4px 0}
+
+.h{font-family:var(--display);font-weight:700;font-size:1.12rem;margin:26px 2px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.h span{font-family:var(--body);font-weight:400;font-size:.82rem;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:10px}
+.empty{color:var(--muted);font-size:.9rem;padding:6px 4px;line-height:1.5}
+
+.card{width:100%;text-align:left;border:0;background:var(--surface);border-radius:20px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--av-ink);flex:none}
+.a0{background:var(--av1)}.a1{background:var(--av2)}.a2{background:var(--av3)}.a3{background:var(--av4)}
+.card .l{flex:1;min-width:0}
+.card .n{font-weight:700;font-size:1rem}
+.card .s{font-size:.8rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .r{text-align:right;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.badge{display:inline-block;border-radius:99px;padding:3px 10px;font-size:.74rem;font-weight:700;white-space:nowrap}
+.b-week{background:var(--week-bg);color:var(--week-fg)}
+.b-day{background:var(--day-bg);color:var(--day-fg)}
+.b-plain{background:var(--plain-bg);color:var(--plain-fg)}
+.b-over{background:var(--over-bg);color:var(--over-fg)}
+.alert-row{display:flex;flex-direction:column;gap:0;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.alert-row .card{box-shadow:none;border-radius:0}
+.alert-row .send{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 12px 12px;padding:11px;border-radius:99px;background:var(--sms);color:#fff;box-shadow:0 4px 12px var(--sms-shadow);font-weight:700;text-decoration:none;font-size:.92rem}
+
+.search{width:100%;border:0;border-radius:99px;background:var(--surface);box-shadow:var(--shadow);padding:12px 18px;font-size:.95rem;margin-bottom:10px;outline-offset:0}
+.search::placeholder{color:var(--muted)}
+
+.fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);border:0;border-radius:99px;background:var(--grad);color:#fff;font-weight:700;font-size:1rem;padding:15px 22px;box-shadow:0 8px 20px var(--grad-shadow);display:flex;align-items:center;gap:6px;z-index:5}
+
+/* 새 창(전체 화면 시트) */
+.sheet{position:fixed;inset:0;background:var(--bg-grad);z-index:20;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+.sheet.open{transform:none}
+.sheet header{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) max(12px,env(safe-area-inset-right,0px)) 10px max(12px,env(safe-area-inset-left,0px));
+  background:var(--head);color:#fff;border-radius:0 0 22px 22px;box-shadow:0 6px 16px var(--head-shadow);margin-bottom:12px}
+.sheet header h2{flex:1;margin:0;font-family:var(--display);font-weight:700;font-size:1.3rem}
+.back{border:0;background:none;color:#fff;width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
+.back svg{width:24px;height:24px}
+.sheet .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 28px) max(16px,env(safe-area-inset-left,0px))}
+.sheet .inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
+
+.prof{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0 6px}
+.prof .av{width:76px;height:76px;font-size:1.9rem}
+.prof .big{font-family:var(--display);font-weight:700;font-size:1.7rem;margin-top:6px}
+.prof a{color:var(--muted);text-decoration:none;font-variant-numeric:tabular-nums}
+.info{border-radius:20px;background:var(--surface);box-shadow:var(--shadow);padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:9px 16px;font-size:.92rem;margin:0}
+.info dt{color:var(--muted)} .info dd{margin:0;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.info dd b{color:var(--accent)}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;border-radius:99px;padding:14px 16px;font-weight:700;font-size:.97rem;text-decoration:none;text-align:center}
+.btn.fill{background:var(--grad);color:#fff;box-shadow:0 4px 12px var(--grad-shadow)}
+.btn.sms{background:var(--sms);color:#fff;box-shadow:0 4px 12px var(--sms-shadow)}
+/* 1주일 전 알림은 보라, 예약일 알림은 주홍 */
+.btn.sms.wk,.alert-row .send.wk{background:var(--sms-week);box-shadow:0 4px 12px var(--sms-week-shadow)}
+.btn.tonal{background:var(--container);color:var(--on-container)}
+.btn.out{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.danger{background:var(--surface);color:var(--danger);box-shadow:inset 0 0 0 1px var(--line)}
+.st{font-size:.8rem;color:var(--muted);text-align:center;margin:-4px 0 4px}
+.st.ok{color:var(--ok)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.field{display:flex;flex-direction:column;gap:5px;background:var(--surface);border-radius:16px;padding:10px 14px 10px;box-shadow:var(--shadow)}
+.field:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.field label{font-size:.76rem;color:var(--muted)}
+.field input,.field textarea{border:0;background:none;padding:2px 0;font-size:1.02rem;outline:none;width:100%;min-width:0}
+.field textarea{resize:vertical;min-height:84px;line-height:1.5;font-size:.95rem}
+.field .with-suf{display:flex;align-items:center;gap:8px}
+.field .suf{color:var(--muted);flex:none}
+.field.err{box-shadow:0 0 0 2px var(--danger)}
+.errmsg{color:var(--danger);font-size:.78rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:0;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);border-radius:99px;padding:7px 14px;font-size:.88rem}
+.chip.on{background:var(--accent);color:var(--on-accent);box-shadow:none}
+.hint{font-size:.88rem;background:var(--container);color:var(--on-container);border-radius:14px;padding:11px 14px;line-height:1.45}
+.help{font-size:.82rem;color:var(--muted);line-height:1.55;margin:0 4px}
+.sec{font-family:var(--display);font-weight:700;font-size:1.05rem;margin:14px 2px 0}
+
+.dialog-wrap{position:fixed;inset:0;background:var(--scrim);z-index:40;display:flex;align-items:center;justify-content:center;padding:20px}
+.dialog{background:var(--bg);border-radius:26px;padding:22px 20px 16px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px}
+.dialog h3{margin:0;font-family:var(--display);font-weight:700;font-size:1.2rem}
+.dialog p{margin:0;font-size:.92rem;color:var(--muted);line-height:1.5;white-space:pre-line}
+.dialog .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.dialog .acts button{border:0;background:none;color:var(--accent);font-weight:700;padding:10px 16px;border-radius:99px}
+.dialog .acts button.go{background:var(--grad);color:#fff}
+.dialog .acts button.go.danger{background:var(--danger);color:#fff}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 16px;font-size:.9rem;display:flex;gap:14px;align-items:center;z-index:60;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgb(0 0 0 / .2)}
+.toast button{border:0;background:none;color:var(--hero-a);font-weight:700;padding:2px}
+.steps{margin:0;padding-left:1.3em;line-height:1.7;font-size:.92rem}
+</style>
+<style>
+/* 모임 앱에 더한 것: 모임 카드, 아래 탭, 참석·회비 버튼, 장부 */
+:root{--grn:#15803d;--grn2:#dcfce7;--red:#dc2626;--red2:#fee2e2;--gray2:#eef0f7}
+.ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:1.5rem;flex:none}
+.ic0{background:#e0e7ff}.ic1{background:#dcfce7}.ic2{background:#fef3c7}.ic3{background:#fce7f3}.ic4{background:#e0f2fe}
+.b-ok{background:var(--grn2);color:var(--grn)}.b-no{background:var(--red2);color:var(--red)}
+.money{font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums}
+.plus{color:var(--grn);font-weight:700}.minus{color:var(--red);font-weight:700}
+.box{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:14px 16px}
+.box .t{font-family:var(--display);font-weight:700;font-size:1.08rem;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.box .t span{font-family:var(--body);font-weight:400;font-size:.82rem;color:var(--muted)}
+.ln{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:9px 0;font-size:.95rem}
+.ln:first-of-type{border-top:0}
+.ln .m{color:var(--muted);font-size:.8rem}
+.mem{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;border-top:1px solid var(--line);padding:8px 0}
+.mem:first-of-type{border-top:0}
+.mem b{font-size:1rem}
+.tg{border:0;border-radius:12px;padding:8px 11px;font-size:.86rem;font-weight:700;min-width:64px}
+.tg.on{background:var(--grn2);color:var(--grn)}.tg.off{background:var(--gray2);color:var(--muted)}.tg.due{background:var(--red2);color:var(--red)}
+.seg{display:flex;background:var(--gray2);border-radius:99px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;border-radius:99px;padding:8px 4px;font-weight:700;font-size:.88rem;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgb(0 0 0 / .08)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;padding:8px max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 8px) max(12px,env(safe-area-inset-left,0px));pointer-events:none}
+.tabbar nav{pointer-events:auto;max-width:560px;margin:0 auto;background:var(--surface);border-radius:22px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;box-shadow:0 4px 18px rgb(31 29 51 / .14)}
+.tabbar button{border:0;background:none;border-radius:16px;padding:6px 0;font-size:.78rem;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1px}
+.tabbar button span{font-size:1.3rem}
+.tabbar button.on{background:var(--container);color:var(--on-container)}
+.card .n,.card .s{display:block}
+.sheet.club .body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 100px)}
+pre.report{white-space:pre-wrap;font-family:var(--body);font-size:.9rem;line-height:1.55;background:#fef9c3;border-radius:16px;padding:14px;margin:0}
+.field select{border:0;background:none;padding:2px 0;font-size:1.02rem;outline:none;width:100%}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.mini{border:0;background:var(--container);color:var(--on-container);border-radius:99px;padding:6px 12px;font-weight:700;font-size:.82rem}
+.smsmini{border:0;border-radius:99px;padding:6px 12px;font-weight:700;font-size:.8rem;background:var(--sms);color:#fff;text-decoration:none;white-space:nowrap}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="topbar">
+    <h1>우리 모임</h1>
+    <button class="iconbtn" id="btnSettings" aria-label="설정">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.47.47 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+    </button>
+  </div>
+</header>
+<div class="page" id="home">
+  <div class="hero" id="hero">
+    <span class="k" id="heroK"></span>
+    <span class="v" id="heroV"></span>
+    <span class="s" id="heroS"></span>
+  </div>
+  <div class="banner" id="installBanner" hidden>
+    <p>홈 화면에 추가하면 앱처럼 아이콘을 눌러 바로 열 수 있어요.</p>
+    <button class="linkbtn" id="btnInstallHow">방법 보기</button>
+    <button class="x" id="btnInstallClose" aria-label="닫기">✕</button>
+  </div>
+  <div class="banner" id="sampleBanner" hidden>
+    <p>지금 보이는 모임은 <b>예시</b>예요. 둘러본 뒤 지워 주세요.</p>
+    <button class="linkbtn" id="btnClearSamples">예시 지우기</button>
+  </div>
+  <div class="h">내 모임 <span id="clubCount"></span></div>
+  <div class="list" id="clubList"></div>
+</div>
+<button class="fab" id="fab"><span aria-hidden="true">＋</span> 새 모임</button>
+
+<script>
+"use strict";
+/* ---------- 저장: 모든 자료는 이 휴대폰 안에만 ---------- */
+const KEY = "club.v1";
+const T_NOTICE = "[{모임}] {날짜} {시간} {장소}에서 모입니다.{회비안내} 참석 여부 알려 주세요.";
+const T_DUE = "[{모임}] {이름}님, 회비 {금액}원({내역})이 아직 확인되지 않았어요. {계좌}로 보내 주세요. 이미 보내셨다면 알려 주세요 🙏";
+let state = { clubs: [] };
+let storageOk = true;
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch (e) { storageOk = false; }
+  if (!Array.isArray(state.clubs)) state.clubs = [];
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
+  catch (e) { storageOk = false; toast("저장에 실패했어요. 개인정보 보호(시크릿) 모드인지 확인해 주세요."); }
+}
+
+/* ---------- 날짜 ---------- */
+const WD = "일월화수목금토";
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const todayStr = () => ymd(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+const daysUntil = s => { const a = parse(s), b = parse(todayStr());
+  return Math.round((Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5); };
+const pretty = s => { const d = parse(s); return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WD[d.getDay()]})`; };
+const dLabel = d => d === 0 ? "오늘" : d > 0 ? `D-${d}` : `${-d}일 지남`;
+const monthKey = s => s.slice(0, 7);
+const prettyMonth = k => `${+k.slice(0, 4)}년 ${+k.slice(5, 7)}월`;
+const timeText = t => { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${h < 12 ? "오전" : "오후"} ${h % 12 || 12}시${m ? ` ${m}분` : ""}`; };
+
+/** 그 달의 n번째 요일 (n=-1이면 마지막) */
+function nthWeekday(y, m, nth, wd) {
+  if (nth === -1) { const d = new Date(y, m + 1, 0); while (d.getDay() !== wd) d.setDate(d.getDate() - 1); return d; }
+  const d = new Date(y, m, 1); while (d.getDay() !== wd) d.setDate(d.getDate() + 1);
+  d.setDate(d.getDate() + (nth - 1) * 7);
+  return d.getMonth() === m ? d : null;
+}
+/** 주기에 따라 date 다음 모임 날짜 */
+function nextAfter(date, sch) {
+  if (!sch || sch.kind === "manual") return null;
+  if (sch.kind === "weeks") return addDays(date, (sch.weeks || 1) * 7);
+  const d = parse(date);
+  for (let i = 1; i < 14; i++) { const x = nthWeekday(d.getFullYear(), d.getMonth() + i, sch.nth, sch.wd); if (x) return ymd(x); }
+  return null;
+}
+/** 오늘 이후 첫 모임 날짜 (주기로) */
+function firstFrom(sch, from = todayStr()) {
+  if (!sch || sch.kind === "manual") return from;
+  if (sch.kind === "weeks") { let d = new Date(); while (d.getDay() !== sch.wd) d.setDate(d.getDate() + 1); return ymd(d); }
+  const t = parse(from);
+  for (let i = 0; i < 14; i++) { const x = nthWeekday(t.getFullYear(), t.getMonth() + i, sch.nth, sch.wd); if (x && ymd(x) >= from) return ymd(x); }
+  return from;
+}
+const NTH = { 1: "첫째", 2: "둘째", 3: "셋째", 4: "넷째", 5: "다섯째", "-1": "마지막" };
+function schText(sch) {
+  if (!sch || sch.kind === "manual") return "날짜 직접 정함";
+  if (sch.kind === "weeks") return sch.weeks === 1 ? `매주 ${WD[sch.wd]}요일` : `${sch.weeks}주마다 ${WD[sch.wd]}요일`;
+  return `매월 ${NTH[sch.nth]} ${WD[sch.wd]}요일`;
+}
+
+/* ---------- 공통 ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const won = n => `${Math.round(n || 0).toLocaleString("ko-KR")}원`;
+const num = s => parseInt(String(s ?? "").replace(/[^\d]/g, ""), 10) || 0;
+function hash(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) | 0; return Math.abs(h); }
+function initial(name) { const n = [...name.trim()]; return n.length === 3 ? n[1] : (n[0] || "?"); }
+const avatar = name => `<span class="av a${hash(name) % 4}" aria-hidden="true">${esc(initial(name))}</span>`;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const cleanNum = p => (p || "").replace(/[^\d+]/g, "");
+function smsHref(phones, text) {
+  const nums = (Array.isArray(phones) ? phones : [phones]).map(cleanNum).filter(Boolean);
+  if (isIOS) return nums.length > 1 ? `sms:/open?addresses=${nums.join(",")}&body=${encodeURIComponent(text)}` : `sms:${nums[0] || ""}&body=${encodeURIComponent(text)}`;
+  return `sms:${nums.join(",")}?body=${encodeURIComponent(text)}`;
+}
+async function copyText(t, msg = "복사했어요. 카톡에 붙여 넣으세요") {
+  try { await navigator.clipboard.writeText(t); toast(msg); }
+  catch { const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); toast(msg); }
+}
+
+let toastTimer;
+function toast(text, undo) {
+  document.querySelector(".toast")?.remove();
+  const t = document.createElement("div");
+  t.className = "toast"; t.setAttribute("role", "status");
+  t.innerHTML = `<span>${esc(text)}</span>${undo ? '<button type="button">되돌리기</button>' : ""}`;
+  if (undo) t.querySelector("button").onclick = () => { undo(); t.remove(); toast("되돌렸어요"); };
+  document.body.appendChild(t);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), undo ? 6000 : 2600);
+}
+function confirmBox({ title, msg, ok = "확인", danger = false, onOk }) {
+  const w = document.createElement("div");
+  w.className = "dialog-wrap";
+  w.innerHTML = `<div class="dialog" role="dialog" aria-modal="true"><h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ""}
+    <div class="acts"><button type="button" data-a="no">취소</button><button type="button" class="go ${danger ? "danger" : ""}" data-a="ok">${esc(ok)}</button></div></div>`;
+  w.addEventListener("click", e => {
+    const a = e.target.dataset.a;
+    if (e.target === w || a === "no") w.remove();
+    if (a === "ok") { w.remove(); onOk(); }
+  });
+  document.body.appendChild(w);
+  w.querySelector(".go").focus();
+}
+
+/* ---------- 새 창(시트): 휴대폰 뒤로가기로도 닫힌다 ---------- */
+const stack = [];
+const BACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
+function openSheet(title, html, mount, refresh, cls = "") {
+  const s = document.createElement("section");
+  s.className = `sheet ${cls}`; s.setAttribute("role", "dialog"); s.setAttribute("aria-label", title);
+  s.innerHTML = `<header><button class="back" type="button" aria-label="뒤로">${BACK_SVG}</button><h2>${esc(title)}</h2></header>
+    <div class="body"><div class="inner">${html}</div></div>`;
+  s.querySelector(".back").onclick = () => history.back();
+  document.body.appendChild(s);
+  stack.push({ el: s, refresh });
+  history.pushState({ sheet: stack.length }, "");
+  requestAnimationFrame(() => requestAnimationFrame(() => s.classList.add("open")));
+  mount?.(s);
+  return s;
+}
+function popSheet() {
+  const top = stack.pop();
+  if (!top) return;
+  top.el.classList.remove("open");
+  setTimeout(() => top.el.remove(), 280);
+  refreshAll();
+}
+window.addEventListener("popstate", popSheet);
+const closeSheet = () => history.back();
+function refreshAll() { renderHome(); for (const s of stack) s.refresh?.(); }
+
+/* ---------- 모임 자료 계산 ---------- */
+const club = id => state.clubs.find(c => c.id === id);
+const activeMembers = c => c.members.filter(m => !m.left).sort((a, b) => a.name.localeCompare(b.name));
+const member = (c, id) => c.members.find(m => m.id === id);
+/** 모임(날짜) 기록: 없으면 기본값으로 만든다 */
+function meetingOn(c, date) {
+  let mt = c.meetings.find(x => x.date === date);
+  if (!mt) { mt = { id: uid(), date, time: c.time || "", place: c.place || "", fee: c.feeType === "meeting" ? c.fee : 0, att: {}, paid: {}, done: false, memo: "" }; c.meetings.push(mt); }
+  return mt;
+}
+const nextMeetingDate = c => c.nextDate || firstFrom(c.schedule);
+/** 회비 수입 목록: 모임 회비 + 월·연 회비 + 특별회비. 각 {date, amount, label, who} */
+function feeIncomes(c) {
+  const out = [];
+  for (const mt of c.meetings) for (const [mid, d] of Object.entries(mt.paid || {})) if (d && mt.fee) out.push({ date: d, amount: mt.fee, label: `${pretty(mt.date)} 모임 회비`, who: mid, group: `mt:${mt.id}` });
+  for (const [k, row] of Object.entries(c.dues || {})) for (const [mid, d] of Object.entries(row)) if (d) out.push({ date: d, amount: c.fee, label: c.feeType === "year" ? `${k}년 연회비` : `${prettyMonth(k)} 회비`, who: mid, group: `due:${k}` });
+  for (const sp of c.specials || []) for (const [mid, d] of Object.entries(sp.paid || {})) if (d) out.push({ date: d, amount: sp.amount, label: sp.title, who: mid, group: `sp:${sp.id}` });
+  return out;
+}
+function totals(c, from = "", to = "9999") {
+  const inR = d => d >= from && d <= to;
+  const fees = feeIncomes(c).filter(x => inR(x.date)), man = c.ledger.filter(x => inR(x.date));
+  const income = fees.reduce((a, x) => a + x.amount, 0) + man.filter(x => x.kind === "in").reduce((a, x) => a + x.amount, 0);
+  const spend = man.filter(x => x.kind === "out").reduce((a, x) => a + x.amount, 0);
+  return { income, spend, fees, man };
+}
+const balance = (c, upTo = "9999") => (c.opening || 0) + totals(c, "", upTo).income - totals(c, "", upTo).spend;
+/** 미납: 회원별 [{label, amount, kind, ref}] */
+function unpaid(c) {
+  const res = new Map();
+  const add = (mid, item) => { if (!res.has(mid)) res.set(mid, []); res.get(mid).push(item); };
+  const ids = new Set(activeMembers(c).map(m => m.id));
+  if (c.feeType === "meeting") {
+    for (const mt of c.meetings) if (mt.fee && (mt.done || mt.date <= todayStr()))
+      for (const [mid, on] of Object.entries(mt.att || {})) if (on && ids.has(mid) && !mt.paid?.[mid]) add(mid, { label: `${+mt.date.slice(5, 7)}/${+mt.date.slice(8)} 모임`, amount: mt.fee, kind: "mt", ref: mt.id });
+  } else if (c.fee) {
+    const keys = [];
+    if (c.feeType === "month") { let k = c.feeStart || monthKey(todayStr()); while (k <= monthKey(todayStr())) { keys.push(k); const [y, m] = k.split("-").map(Number); k = m === 12 ? `${y + 1}-01` : `${y}-${pad(m + 1)}`; } }
+    else { for (let y = +(c.feeStart || todayStr()).slice(0, 4); y <= new Date().getFullYear(); y++) keys.push(String(y)); }
+    for (const m of activeMembers(c)) for (const k of keys) {
+      if ((m.joined || "") > (c.feeType === "month" ? `${k}-31` : `${k}-12-31`)) continue;
+      if (!c.dues?.[k]?.[m.id]) add(m.id, { label: c.feeType === "month" ? `${+k.slice(5)}월` : `${k}년`, amount: c.fee, kind: "due", ref: k });
+    }
+  }
+  for (const sp of c.specials || []) for (const m of activeMembers(c)) if (!sp.paid?.[m.id] && !(sp.except || []).includes(m.id)) add(m.id, { label: sp.title, amount: sp.amount, kind: "sp", ref: sp.id });
+  return [...res.entries()].map(([mid, items]) => ({ m: member(c, mid), items, sum: items.reduce((a, x) => a + x.amount, 0) })).filter(x => x.m).sort((a, b) => b.sum - a.sum);
+}
+const FEE_TEXT = { meeting: "모임 때마다", month: "매월", year: "매년" };
+function fill(t, c, extra = {}) {
+  const v = { 모임: c.name, 계좌: c.account || "회비 계좌", ...extra };
+  return t.replace(/\{(\S+?)\}/g, (_, k) => v[k] ?? "").replace(/ {2,}/g, " ").trim();
+}
+function noticeText(c, mt) {
+  return fill(c.noticeTemplate || T_NOTICE, c, { 날짜: pretty(mt.date), 시간: timeText(mt.time), 장소: mt.place || "", 회비안내: mt.fee ? ` 회비는 ${won(mt.fee)}이에요.` : "" });
+}
+function dueText(c, u) { return fill(c.dueTemplate || T_DUE, c, { 이름: u.m.name, 금액: u.sum.toLocaleString("ko-KR"), 내역: u.items.map(x => x.label).join(", ") }); }
+
+/* ---------- 첫 화면 ---------- */
+function renderHome() {
+  const list = $("#clubList");
+  const ups = state.clubs.map(c => ({ c, d: nextMeetingDate(c) })).sort((a, b) => a.d.localeCompare(b.d));
+  const up = ups[0];
+  if (up) {
+    const mt = up.c.meetings.find(x => x.date === up.d);
+    $("#heroK").textContent = `다음 모임 · ${dLabel(daysUntil(up.d))}`;
+    $("#heroV").textContent = `${pretty(up.d)} ${timeText(mt?.time ?? up.c.time)}`;
+    $("#heroS").textContent = `${up.c.emoji} ${up.c.name}${(mt?.place ?? up.c.place) ? ` · ${mt?.place ?? up.c.place}` : ""}`;
+  } else { $("#heroK").textContent = "우리 모임"; $("#heroV").textContent = "모임을 만들어 보세요"; $("#heroS").textContent = "아래 ＋ 새 모임을 누르면 시작해요"; }
+  $("#clubCount").textContent = state.clubs.length ? `${state.clubs.length}개` : "";
+  $("#sampleBanner").hidden = !state.clubs.some(c => c.sample);
+  list.innerHTML = state.clubs.length ? state.clubs.map((c, i) => {
+    const un = unpaid(c), d = nextMeetingDate(c);
+    return `<button class="card" data-id="${c.id}"><span class="ic ic${i % 5}">${esc(c.emoji)}</span><span class="l">
+      <span class="n">${esc(c.name)}</span>
+      <span class="s">${esc(schText(c.schedule))} · 회원 ${activeMembers(c).length}명 · 잔액 ${won(balance(c))}</span>
+      <span class="s">다음 모임 ${pretty(d)}</span></span>
+      <span class="r">${un.length ? `<span class="badge b-no">미납 ${un.length}</span>` : `<span class="badge b-ok">완납</span>`}<span class="badge b-plain">${dLabel(daysUntil(d))}</span></span></button>`;
+  }).join("") : `<p class="empty">아직 모임이 없어요. 오른쪽 아래 <b>＋ 새 모임</b>을 눌러 만들거나, 설정에서 <b>예시 모임</b>을 넣어 둘러보세요.</p>`;
+  list.querySelectorAll(".card").forEach(b => b.onclick = () => openClub(b.dataset.id));
+}
+
+/* ---------- 모임 화면 (아래 탭: 일정·회원·회비·설정) ---------- */
+function openClub(id, tab = "plan") {
+  const c = club(id);
+  let cur = tab, feeTab = "due", dueK = null;
+  const s = openSheet(`${c.emoji} ${c.name}`, `<div id="cv"></div>`, null, () => draw(), "club");
+  const bar = document.createElement("div");
+  bar.className = "tabbar";
+  bar.innerHTML = `<nav>${[["plan", "📅", "일정"], ["mem", "👥", "회원"], ["fee", "💰", "회비"], ["set", "⚙️", "설정"]].map(([k, e, l]) => `<button data-t="${k}"><span>${e}</span>${l}</button>`).join("")}</nav>`;
+  s.appendChild(bar);
+  bar.querySelectorAll("button").forEach(b => b.onclick = () => { cur = b.dataset.t; draw(); s.querySelector(".body").scrollTop = 0; });
+  const v = s.querySelector("#cv");
+  function draw() {
+    if (!club(id)) return;
+    s.querySelector("h2").textContent = `${c.emoji} ${c.name}`;
+    bar.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === cur));
+    if (cur === "plan") drawPlan(); else if (cur === "mem") drawMembers(); else if (cur === "fee") drawFee(); else drawSet();
+  }
+  /* 📅 일정 */
+  function drawPlan() {
+    const d = nextMeetingDate(c), mt = c.meetings.find(x => x.date === d);
+    const past = c.meetings.filter(x => x.done).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
+    const later = []; let x = d; for (let i = 0; i < 3; i++) { x = nextAfter(x, c.schedule); if (!x) break; later.push(x); }
+    const attN = mt ? Object.values(mt.att).filter(Boolean).length : 0;
+    v.innerHTML = `<div class="hero"><span class="k">다음 모임 · ${dLabel(daysUntil(d))}</span><span class="v">${pretty(d)}</span>
+        <span class="s">${esc(timeText(mt?.time ?? c.time))}${(mt?.place ?? c.place) ? ` · ${esc(mt?.place ?? c.place)}` : ""}${c.feeType === "meeting" && c.fee ? ` · 회비 ${won(mt?.fee ?? c.fee)}` : ""}${mt ? ` · 참석 ${attN}명 체크됨` : ""}</span></div>
+      <button class="btn fill" id="openNext">✅ 이 모임 열기 (참석·회비 체크)</button>
+      <div class="box"><div class="t">앞으로 <span>${esc(schText(c.schedule))}</span></div>
+        ${later.length ? later.map(x => `<div class="ln"><span>${pretty(x)}</span><span class="m">${dLabel(daysUntil(x))}</span></div>`).join("") : `<p class="help" style="margin:6px 0 0">날짜를 직접 정하는 모임이에요. 모임을 마치면 다음 날짜를 물어봐요.</p>`}
+        <button class="mini" id="changeNext" style="margin-top:8px">다음 모임 날짜 바꾸기</button></div>
+      <div class="box"><div class="t">지난 모임 <span>${past.length ? `${past.length}번` : ""}</span></div>
+        ${past.length ? past.map(p => { const a = Object.values(p.att).filter(Boolean).length, paid = Object.values(p.paid).filter(Boolean).length;
+          return `<button class="ln" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left" data-d="${p.date}"><span>${pretty(p.date)}<br><span class="m">참석 ${a}명${p.fee ? ` · 회비 ${won(paid * p.fee)}` : ""}</span></span><span class="m">›</span></button>`; }).join("")
+          : `<p class="help" style="margin:6px 0 0">아직 마친 모임이 없어요.</p>`}</div>`;
+    v.querySelector("#openNext").onclick = () => openMeeting(c, d);
+    v.querySelector("#changeNext").onclick = () => askDate(c, d, nd => { c.nextDate = nd; save(); refreshAll(); });
+    v.querySelectorAll("[data-d]").forEach(b => b.onclick = () => openMeeting(c, b.dataset.d));
+  }
+  /* 👥 회원 */
+  function drawMembers() {
+    const ms = activeMembers(c), un = new Map(unpaid(c).map(u => [u.m.id, u]));
+    const done = c.meetings.filter(x => x.done);
+    v.innerHTML = `<button class="btn fill" id="addMem">＋ 회원 추가</button>
+      ${ms.length ? `<div class="list">${ms.map(m => { const u = un.get(m.id), a = done.filter(x => x.att[m.id]).length;
+        return `<button class="card" data-m="${m.id}">${avatar(m.name)}<span class="l"><span class="n">${esc(m.name)}</span><span class="s">${esc(m.phone || "전화번호 없음")}${done.length ? ` · 참석 ${a}/${done.length}` : ""}</span></span>
+        <span class="r">${u ? `<span class="badge b-no">미납 ${won(u.sum)}</span>` : `<span class="badge b-ok">완납</span>`}</span></button>`; }).join("")}</div>`
+        : `<p class="empty">회원을 추가해 주세요. 이름과 전화번호만 있으면 돼요.</p>`}
+      ${c.members.some(m => m.left) ? `<p class="help">탈퇴한 회원 ${c.members.filter(m => m.left).length}명은 목록에서 숨겼어요 (기록은 남아 있어요).</p>` : ""}`;
+    v.querySelector("#addMem").onclick = () => editMember(c);
+    v.querySelectorAll("[data-m]").forEach(b => b.onclick = () => openMember(c, b.dataset.m));
+  }
+  /* 💰 회비 */
+  function drawFee() {
+    const now = todayStr(), mk = monthKey(now), t = totals(c, `${mk}-01`, `${mk}-31`), un = unpaid(c);
+    v.innerHTML = `<div class="hero"><span class="k">지금 잔액 (통장에 있어야 할 돈)</span><span class="v">${won(balance(c))}</span>
+        <span class="s">${+mk.slice(5)}월 수입 +${won(t.income)} · 지출 −${won(t.spend)}</span></div>
+      <div class="seg">${[["due", "미납"], ["book", "수입·지출"], ["dues", c.feeType === "meeting" ? "특별회비" : "회비표"], ["rep", "결산"]].map(([k, l]) => `<button data-f="${k}" class="${feeTab === k ? "on" : ""}">${l}</button>`).join("")}</div>
+      <div id="fv"></div>`;
+    v.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { feeTab = b.dataset.f; drawFee(); });
+    const f = v.querySelector("#fv");
+    if (feeTab === "due") {
+      const sum = un.reduce((a, u) => a + u.sum, 0);
+      f.innerHTML = `<div class="box"><div class="t">미납 ${un.length}명 <span>${won(sum)}</span></div>
+        ${un.length ? un.map(u => `<div class="ln"><span><b>${esc(u.m.name)}</b><br><span class="m">${esc(u.items.map(x => x.label).join(", "))}</span></span>
+          <span style="text-align:right"><b class="minus">${won(u.sum)}</b><br>${u.m.phone ? `<a class="smsmini" href="${esc(smsHref(u.m.phone, dueText(c, u)))}">📩 문자</a>` : ""}</span></div>`).join("")
+          : `<p class="help" style="margin:6px 0 0">🎉 미납이 없어요.</p>`}</div>
+        ${un.length ? `<button class="btn sms" id="dueAll">📩 미납 안내 문구 한 번에 복사 (단톡방용)</button>` : ""}
+        ${!c.account ? `<p class="help">⚙️ 설정에서 <b>회비 계좌</b>를 넣으면 안내 문자에 자동으로 들어가요.</p>` : ""}`;
+      f.querySelector("#dueAll")?.addEventListener("click", () => copyText(`[${c.name}] 회비 미납 안내\n${un.map(u => `· ${u.m.name} ${won(u.sum)} (${u.items.map(x => x.label).join(", ")})`).join("\n")}\n${c.account ? `🏦 ${c.account}` : ""}\n이미 보내셨다면 알려 주세요 🙏`));
+    } else if (f && feeTab === "book") {
+      const fees = feeIncomes(c), groups = new Map();
+      for (const x of fees) { const g = groups.get(x.group) ?? { date: x.date, label: x.label, amount: 0, n: 0 }; g.amount += x.amount; g.n++; if (x.date > g.date) g.date = x.date; groups.set(x.group, g); }
+      const rows = [...[...groups.values()].map(g => ({ date: g.date, label: `${g.label} (${g.n}명)`, amount: g.amount, kind: "in", auto: true })), ...c.ledger.map(x => ({ ...x, label: `${x.category}${x.memo ? ` · ${x.memo}` : ""}` }))]
+        .sort((a, b) => b.date.localeCompare(a.date));
+      f.innerHTML = `<div class="row2"><button class="btn tonal" id="addIn">＋ 수입</button><button class="btn tonal" id="addOut">－ 지출</button></div>
+        <div class="box"><div class="t">내역 <span>회비는 체크하면 자동으로 들어가요</span></div>
+        ${rows.length ? rows.slice(0, 80).map(r => `<${r.auto ? "div" : `button data-e="${r.id}"`} class="ln" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left">
+          <span>${esc(r.label)}<br><span class="m">${+r.date.slice(5, 7)}/${+r.date.slice(8)}${r.auto ? " · 회비 체크" : ""}</span></span>
+          <b class="${r.kind === "in" ? "plus" : "minus"}">${r.kind === "in" ? "+" : "−"}${r.amount.toLocaleString("ko-KR")}</b></${r.auto ? "div" : "button"}>`).join("") : `<p class="help" style="margin:6px 0 0">아직 내역이 없어요.</p>`}
+        <div class="ln"><span class="m">처음 잔액 (앱 쓰기 전 통장 돈)</span><b>${won(c.opening || 0)}</b></div></div>`;
+      f.querySelector("#addIn").onclick = () => editEntry(c, null, "in");
+      f.querySelector("#addOut").onclick = () => editEntry(c, null, "out");
+      f.querySelectorAll("[data-e]").forEach(b => b.onclick = () => editEntry(c, b.dataset.e));
+    } else if (feeTab === "dues") drawDues(f);
+    else drawReport(f);
+  }
+  /* 월·연 회비표 또는 특별회비 */
+  function drawDues(f) {
+    const ms = activeMembers(c);
+    const blocks = [];
+    if (c.feeType !== "meeting") {
+      const k = c.feeType === "month" ? (dueK || monthKey(todayStr())) : String(new Date().getFullYear());
+      const row = (c.dues[k] ||= {});
+      blocks.push(`<div class="box"><div class="t">${c.feeType === "month" ? prettyMonth(k) : `${k}년`} 회비 <span>${won(c.fee)} · ${Object.values(row).filter(Boolean).length}/${ms.length}명</span></div>
+        ${c.feeType === "month" ? `<div class="row2" style="margin:6px 0"><button class="mini" data-mv="-1">‹ 이전 달</button><button class="mini" data-mv="1">다음 달 ›</button></div>` : ""}
+        ${ms.map(m => `<div class="mem"><b>${esc(m.name)}</b><span class="m">${row[m.id] ? `${+row[m.id].slice(5, 7)}/${+row[m.id].slice(8)} 입금` : ""}</span><button class="tg ${row[m.id] ? "on" : "due"}" data-due="${m.id}">${row[m.id] ? "💰 냄" : "안 냄"}</button></div>`).join("") || `<p class="help">회원을 먼저 추가해 주세요.</p>`}</div>`);
+      setTimeout(() => {
+        f.querySelectorAll("[data-due]").forEach(b => b.onclick = () => { row[b.dataset.due] = row[b.dataset.due] ? null : todayStr(); save(); drawFee(); });
+        f.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => { const [y, m] = k.split("-").map(Number), d = new Date(y, m - 1 + +b.dataset.mv, 1); dueK = monthKey(ymd(d)); drawDues(f); });
+      });
+    }
+    blocks.push(`<div class="box"><div class="t">특별회비 · 경조사 <span>따로 걷는 돈</span></div>
+      ${(c.specials || []).length ? c.specials.map(sp => `<button class="ln" data-sp="${sp.id}" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left"><span>${esc(sp.title)}<br><span class="m">1인 ${won(sp.amount)} · ${Object.values(sp.paid).filter(Boolean).length}/${ms.length - (sp.except || []).length}명 냄</span></span><span class="m">›</span></button>`).join("")
+        : `<p class="help" style="margin:6px 0 0">예) 부의금 1인 30,000원, 연말 행사비</p>`}
+      <button class="mini" id="addSp" style="margin-top:8px">＋ 특별회비 만들기</button></div>`);
+    f.innerHTML = blocks.join("");
+    f.querySelector("#addSp").onclick = () => editSpecial(c);
+    f.querySelectorAll("[data-sp]").forEach(b => b.onclick = () => openSpecial(c, b.dataset.sp));
+  }
+  /* 결산 (카톡용 글) */
+  function drawReport(f) {
+    const now = todayStr(), y = now.slice(0, 4), mk = monthKey(now);
+    f.innerHTML = `<div class="seg" id="rp">${[["last", "지난 모임"], ["month", "이번 달"], ["pmonth", "지난달"], ["year", "올해"]].map(([k, l]) => `<button data-r="${k}">${l}</button>`).join("")}</div><div id="rv"></div>`;
+    const show = kind => {
+      f.querySelectorAll("[data-r]").forEach(b => b.classList.toggle("on", b.dataset.r === kind));
+      let from, to, title;
+      if (kind === "last") { const p = c.meetings.filter(x => x.done).sort((a, b) => b.date.localeCompare(a.date))[0]; if (!p) { f.querySelector("#rv").innerHTML = `<p class="empty">마친 모임이 아직 없어요.</p>`; return; }
+        from = p.date; to = addDays(p.date, 6); title = `${pretty(p.date)} 모임 결산`; }
+      else if (kind === "month") { from = `${mk}-01`; to = `${mk}-31`; title = `${+mk.slice(5)}월 결산`; }
+      else if (kind === "pmonth") { const d = parse(`${mk}-01`); d.setMonth(d.getMonth() - 1); const k = monthKey(ymd(d)); from = `${k}-01`; to = `${k}-31`; title = `${+k.slice(5)}월 결산`; }
+      else { from = `${y}-01-01`; to = `${y}-12-31`; title = `${y}년 결산`; }
+      f.querySelector("#rv").innerHTML = `<pre class="report" id="rt">${esc(reportText(c, from, to, title))}</pre><button class="btn fill" id="cp" style="margin-top:10px">📋 복사해서 카톡에 붙여 넣기</button>`;
+      f.querySelector("#cp").onclick = () => copyText(f.querySelector("#rt").textContent);
+    };
+    f.querySelectorAll("[data-r]").forEach(b => b.onclick = () => show(b.dataset.r));
+    show(c.feeType === "meeting" ? "last" : "month");
+  }
+  /* ⚙️ 모임 설정 */
+  function drawSet() {
+    v.innerHTML = `<div class="box"><div class="t">${esc(c.name)}</div>
+        <div class="ln"><span class="m">모임 주기</span><b>${esc(schText(c.schedule))}</b></div>
+        <div class="ln"><span class="m">기본 시간·장소</span><b>${esc(timeText(c.time) || "–")} ${esc(c.place || "")}</b></div>
+        <div class="ln"><span class="m">회비</span><b>${FEE_TEXT[c.feeType]} ${won(c.fee)}</b></div>
+        <div class="ln"><span class="m">회비 계좌</span><b style="text-align:right">${esc(c.account || "–")}</b></div>
+        <div class="ln"><span class="m">처음 잔액</span><b>${won(c.opening || 0)}</b></div></div>
+      <button class="btn fill" id="edit">✏️ 모임 정보 고치기</button>
+      <button class="btn out" id="tpl">📝 안내 문자 문구 고치기</button>
+      <button class="btn danger" id="del">🗑️ 이 모임 지우기</button>
+      <p class="help">백업은 첫 화면 오른쪽 위 ⚙️ 설정에서 모든 모임을 한 번에 저장해요.</p>`;
+    v.querySelector("#edit").onclick = () => editClub(c);
+    v.querySelector("#tpl").onclick = () => editTemplates(c);
+    v.querySelector("#del").onclick = () => confirmBox({ title: "이 모임을 지울까요?", msg: `${c.name}의 회원·모임·회비 기록이 모두 사라져요. 먼저 백업을 권해요.`, ok: "지우기", danger: true,
+      onOk: () => { state.clubs = state.clubs.filter(x => x.id !== c.id); save(); closeSheet(); toast("지웠어요"); } });
+  }
+  draw();
+}
+
+/** 결산 글 */
+function reportText(c, from, to, title) {
+  const t = totals(c, from, to), before = balance(c, addDays(from, -1)), after = before + t.income - t.spend;
+  const fg = new Map();
+  for (const x of t.fees) { const g = fg.get(x.label) ?? { n: 0, a: 0 }; g.n++; g.a += x.amount; fg.set(x.label, g); }
+  const L = [`📊 ${c.name} ${title}`, `(${+from.slice(5, 7)}/${+from.slice(8)} ~ ${+to.slice(5, 7)}/${Math.min(+to.slice(8), 31)})`, "", `💰 이전 잔액   ${won(before)}`, `➕ 수입   ${won(t.income)}`];
+  for (const [l, g] of fg) L.push(`  · ${l} (${g.n}명)  ${g.a.toLocaleString("ko-KR")}`);
+  for (const x of t.man.filter(x => x.kind === "in")) L.push(`  · ${x.category}${x.memo ? ` (${x.memo})` : ""}  ${x.amount.toLocaleString("ko-KR")}`);
+  L.push(`➖ 지출   ${won(t.spend)}`);
+  for (const x of t.man.filter(x => x.kind === "out")) L.push(`  · ${x.category}${x.memo ? ` (${x.memo})` : ""}  ${x.amount.toLocaleString("ko-KR")}`);
+  L.push("━━━━━━━━━━━━", `💵 잔액   ${won(after)}`, "");
+  const un = unpaid(c);
+  if (un.length) L.push(`⏳ 미납: ${un.map(u => `${u.m.name}(${u.sum.toLocaleString("ko-KR")})`).join(", ")}`);
+  if (c.account) L.push(`🏦 회비 계좌: ${c.account}`);
+  const d = nextMeetingDate(c); L.push(`📅 다음 모임: ${pretty(d)} ${timeText(c.meetings.find(x => x.date === d)?.time ?? c.time)}`);
+  return L.join("\n");
+}
+
+/* ---------- 모임 날 화면: 참석·회비 체크 ---------- */
+function openMeeting(c, date) {
+  const mt = meetingOn(c, date); save();
+  const s = openSheet(pretty(date), `<div id="mv"></div>`, null, () => draw());
+  const v = s.querySelector("#mv");
+  function draw() {
+    const ms = activeMembers(c).concat(c.members.filter(m => m.left && (mt.att[m.id] || mt.paid[m.id])));
+    const att = ms.filter(m => mt.att[m.id]).length, paidN = ms.filter(m => mt.paid[m.id]).length;
+    const spends = c.ledger.filter(x => x.meetingId === mt.id);
+    v.innerHTML = `<div class="box"><div class="t">${pretty(mt.date)} <span>${dLabel(daysUntil(mt.date))}${mt.done ? " · 마침" : ""}</span></div>
+        <div class="row3" style="margin-top:8px">
+          <div class="field"><label>시간</label><input type="time" id="tm" value="${esc(mt.time)}"></div>
+          <div class="field" style="grid-column:span 2"><label>장소</label><input id="pl" value="${esc(mt.place)}" placeholder="예: 구파발역 ○○식당"></div></div>
+        ${c.feeType === "meeting" ? `<div class="field" style="margin-top:8px"><label>이번 회비 (1인)</label><div class="with-suf"><input id="fe" inputmode="numeric" value="${mt.fee ? mt.fee.toLocaleString("ko-KR") : ""}"><span class="suf">원</span></div></div>` : ""}</div>
+      <div class="box"><div class="t">참석 ${att} / ${activeMembers(c).length}명 ${c.feeType === "meeting" && mt.fee ? `<span>걷은 회비 <b class="plus">${won(paidN * mt.fee)}</b></span>` : ""}</div>
+        <p class="help" style="margin:4px 0 4px">이름 옆 버튼을 눌러 바꿔요${c.feeType === "meeting" ? ". 회비 체크는 회비 장부에 자동으로 들어가요" : ""}.</p>
+        ${ms.map(m => `<div class="mem"><b>${esc(m.name)}</b><button class="tg ${mt.att[m.id] ? "on" : "off"}" data-a="${m.id}">${mt.att[m.id] ? "참석" : "불참"}</button>
+          ${c.feeType === "meeting" && mt.fee ? `<button class="tg ${mt.paid[m.id] ? "on" : mt.att[m.id] ? "due" : "off"}" data-p="${m.id}">${mt.paid[m.id] ? "💰 냄" : mt.att[m.id] ? "안 냄" : "－"}</button>` : "<span></span>"}</div>`).join("") || `<p class="help">회원을 먼저 추가해 주세요 (👥 회원 탭).</p>`}
+        ${ms.length ? `<div class="row2" style="margin-top:8px"><button class="mini" id="allAtt">모두 참석</button>${c.feeType === "meeting" && mt.fee ? `<button class="mini" id="allPaid">참석자 모두 냄</button>` : ""}</div>` : ""}</div>
+      <div class="box"><div class="t">이 모임 지출 <span>${won(spends.reduce((a, x) => a + x.amount, 0))}</span></div>
+        ${spends.map(x => `<button class="ln" data-e="${x.id}" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left"><span>${esc(x.category)}${x.memo ? ` · ${esc(x.memo)}` : ""}</span><b class="minus">−${x.amount.toLocaleString("ko-KR")}</b></button>`).join("")}
+        <button class="mini" id="addSpend" style="margin-top:6px">＋ 지출 추가 (식비 등)</button></div>
+      <div class="field"><label>메모</label><textarea id="memo" placeholder="예: 다음엔 장소 예약 미리">${esc(mt.memo)}</textarea></div>
+      <a class="btn sms" id="notice" href="#">📩 모임 안내 문자 보내기 (${activeMembers(c).filter(m => m.phone).length}명)</a>
+      <button class="btn out" id="copyNotice">📋 안내 문구 복사 (단톡방용)</button>
+      <button class="btn out" id="ics">📅 휴대폰 캘린더에 등록</button>
+      ${mt.done ? `<button class="btn tonal" id="undone">모임 마침 취소</button>` : `<button class="btn fill" id="done">✅ 모임 완료${nextAfter(mt.date, c.schedule) ? ` → 다음 모임 ${pretty(nextAfter(mt.date, c.schedule))}` : ""}</button>`}`;
+    const saveFields = () => { mt.time = v.querySelector("#tm").value; mt.place = v.querySelector("#pl").value.trim(); const fe = v.querySelector("#fe"); if (fe) mt.fee = num(fe.value); mt.memo = v.querySelector("#memo").value; save(); };
+    ["#tm", "#pl", "#fe", "#memo"].forEach(sel => { const el = v.querySelector(sel); if (el) el.onchange = () => { saveFields(); draw(); refreshOthers(); }; });
+    v.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { const k = b.dataset.a; mt.att[k] = !mt.att[k]; if (!mt.att[k]) delete mt.paid[k]; save(); draw(); refreshOthers(); });
+    v.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { const k = b.dataset.p; if (mt.paid[k]) delete mt.paid[k]; else { mt.paid[k] = mt.date <= todayStr() ? mt.date : todayStr(); mt.att[k] = true; } save(); draw(); refreshOthers(); });
+    v.querySelector("#allAtt")?.addEventListener("click", () => { for (const m of activeMembers(c)) mt.att[m.id] = true; save(); draw(); refreshOthers(); });
+    v.querySelector("#allPaid")?.addEventListener("click", () => { for (const m of activeMembers(c)) if (mt.att[m.id] && !mt.paid[m.id]) mt.paid[m.id] = mt.date <= todayStr() ? mt.date : todayStr(); save(); draw(); refreshOthers(); });
+    v.querySelector("#addSpend").onclick = () => editEntry(c, null, "out", mt);
+    v.querySelectorAll("[data-e]").forEach(b => b.onclick = () => editEntry(c, b.dataset.e));
+    const phones = activeMembers(c).map(m => m.phone).filter(Boolean);
+    const n = v.querySelector("#notice");
+    n.onclick = e => { saveFields(); n.href = smsHref(phones, noticeText(c, mt)); if (!phones.length) { e.preventDefault(); toast("전화번호가 있는 회원이 없어요"); } };
+    v.querySelector("#copyNotice").onclick = () => { saveFields(); copyText(noticeText(c, mt)); };
+    v.querySelector("#ics").onclick = () => { saveFields(); addToCalendar(c, mt); };
+    v.querySelector("#done")?.addEventListener("click", () => {
+      saveFields(); mt.done = true;
+      const nd = nextAfter(mt.date, c.schedule);
+      const finish = d => { if (d) c.nextDate = d; save(); closeSheet(); toast(`모임 완료! 다음 모임 ${d ? pretty(d) : "날짜를 정해 주세요"}`); };
+      if (nd) finish(nd); else askDate(c, addDays(mt.date, 7), finish);
+    });
+    v.querySelector("#undone")?.addEventListener("click", () => { mt.done = false; c.nextDate = mt.date; save(); draw(); refreshOthers(); });
+  }
+  const refreshOthers = () => { renderHome(); for (const x of stack) if (x.el !== s) x.refresh?.(); };
+  draw();
+}
+
+/** 날짜 고르기 작은 창 */
+function askDate(c, initialDate, done) {
+  const w = document.createElement("div");
+  w.className = "dialog-wrap";
+  w.innerHTML = `<div class="dialog" role="dialog" aria-modal="true"><h3>다음 모임 날짜</h3>
+    <div class="field"><label>날짜</label><input type="date" id="dd" value="${initialDate}"></div>
+    <div class="acts"><button type="button" data-a="no">취소</button><button type="button" class="go" data-a="ok">정하기</button></div></div>`;
+  w.addEventListener("click", e => {
+    const a = e.target.dataset.a;
+    if (e.target === w || a === "no") w.remove();
+    if (a === "ok") { const d = w.querySelector("#dd").value; if (!d) return; w.remove(); done(d); }
+  });
+  document.body.appendChild(w);
+}
+
+/* ---------- 회원 ---------- */
+function openMember(c, mid) {
+  const m = member(c, mid);
+  const s = openSheet(m.name, `<div id="pv"></div>`, null, () => draw());
+  const v = s.querySelector("#pv");
+  function draw() {
+    if (!member(c, mid)) return;
+    const done = c.meetings.filter(x => x.done).sort((a, b) => b.date.localeCompare(a.date));
+    const a = done.filter(x => x.att[m.id]).length, u = unpaid(c).find(x => x.m.id === m.id);
+    const paid = feeIncomes(c).filter(x => x.who === m.id).sort((p, q) => q.date.localeCompare(p.date));
+    v.innerHTML = `<div class="prof">${avatar(m.name).replace('class="av', 'class="av big')}<div class="big">${esc(m.name)}</div>${m.phone ? `<a href="tel:${esc(cleanNum(m.phone))}">${esc(m.phone)}</a>` : ""}</div>
+      <dl class="info"><dt>참석</dt><dd>${done.length ? `${a} / ${done.length}번 (${Math.round((a / done.length) * 100)}%)` : "–"}</dd>
+        <dt>미납</dt><dd>${u ? `<b style="color:var(--red)">${won(u.sum)}</b> · ${esc(u.items.map(x => x.label).join(", "))}` : "없음"}</dd>
+        <dt>낸 회비</dt><dd>${won(paid.reduce((p, x) => p + x.amount, 0))} (${paid.length}번)</dd>
+        <dt>가입일</dt><dd>${m.joined ? pretty(m.joined) : "–"}</dd>
+        ${m.memo ? `<dt>메모</dt><dd>${esc(m.memo)}</dd>` : ""}</dl>
+      ${u && m.phone ? `<a class="btn sms" href="${esc(smsHref(m.phone, dueText(c, u)))}">📩 미납 안내 문자</a>` : ""}
+      ${m.phone ? `<a class="btn out" href="tel:${esc(cleanNum(m.phone))}">📞 전화하기</a>` : ""}
+      <div class="box"><div class="t">회비 낸 기록</div>${paid.length ? paid.slice(0, 20).map(x => `<div class="ln"><span>${esc(x.label)}</span><span class="m">${+x.date.slice(5, 7)}/${+x.date.slice(8)} · ${x.amount.toLocaleString("ko-KR")}</span></div>`).join("") : `<p class="help" style="margin:6px 0 0">아직 없어요.</p>`}</div>
+      <button class="btn tonal" id="ed">✏️ 회원 정보 고치기</button>
+      <button class="btn danger" id="lv">${m.left ? "다시 회원으로" : "탈퇴 처리 (기록은 남겨요)"}</button>`;
+    v.querySelector("#ed").onclick = () => editMember(c, m);
+    v.querySelector("#lv").onclick = () => { m.left = !m.left; save(); toast(m.left ? "탈퇴 처리했어요" : "다시 회원이 됐어요"); closeSheet(); };
+  }
+  draw();
+}
+function editMember(c, m) {
+  const isNew = !m;
+  m = m || { id: uid(), name: "", phone: "", joined: todayStr(), memo: "" };
+  openSheet(isNew ? "회원 추가" : "회원 고치기", `
+    <div class="field"><label>이름</label><input id="nm" value="${esc(m.name)}" autocomplete="off"></div>
+    <div class="field"><label>전화번호</label><input id="ph" type="tel" inputmode="tel" value="${esc(m.phone)}" placeholder="010-0000-0000"></div>
+    <div class="field"><label>가입일</label><input id="jd" type="date" value="${esc(m.joined)}"></div>
+    <div class="field"><label>메모</label><textarea id="me" placeholder="예: 회장, 생일 3/15">${esc(m.memo)}</textarea></div>
+    <button class="btn fill" id="sv">저장</button>
+    ${isNew ? `<p class="help">여러 명을 한 번에 넣으려면 이름 칸에 쉼표로 이어 쓰세요. 예) 김철수, 이영희, 박민수</p>` : ""}`, s => {
+    s.querySelector("#sv").onclick = () => {
+      const name = s.querySelector("#nm").value.trim();
+      if (!name) { s.querySelector("#nm").closest(".field").classList.add("err"); return; }
+      if (isNew && name.includes(",")) {
+        for (const n of name.split(",").map(x => x.trim()).filter(Boolean)) c.members.push({ id: uid(), name: n, phone: "", joined: s.querySelector("#jd").value, memo: "" });
+      } else {
+        Object.assign(m, { name, phone: s.querySelector("#ph").value.trim(), joined: s.querySelector("#jd").value, memo: s.querySelector("#me").value.trim() });
+        if (isNew) c.members.push(m);
+      }
+      save(); closeSheet(); toast("저장했어요");
+    };
+  });
+}
+
+/* ---------- 수입·지출 ---------- */
+const CAT = { in: ["찬조금", "기타 수입", "이자"], out: ["식비", "경조사", "선물", "장소 대여", "교통", "기타 지출"] };
+function editEntry(c, eid, kind, mt) {
+  const e = eid ? c.ledger.find(x => x.id === eid) : { id: uid(), date: mt ? (mt.date <= todayStr() ? mt.date : todayStr()) : todayStr(), kind, category: CAT[kind][0], amount: 0, memo: "", meetingId: mt?.id };
+  const isNew = !eid;
+  openSheet(isNew ? (e.kind === "in" ? "수입 추가" : "지출 추가") : "내역 고치기", `
+    <div class="chips" id="cats">${CAT[e.kind].map(x => `<button class="chip ${x === e.category ? "on" : ""}" data-c="${x}">${x}</button>`).join("")}</div>
+    <div class="field"><label>금액</label><div class="with-suf"><input id="am" inputmode="numeric" value="${e.amount ? e.amount.toLocaleString("ko-KR") : ""}"><span class="suf">원</span></div></div>
+    <div class="field"><label>날짜</label><input id="dt" type="date" value="${e.date}"></div>
+    <div class="field"><label>내용</label><input id="mm" value="${esc(e.memo)}" placeholder="${e.kind === "in" ? "예: 이영희 찬조" : "예: ○○갈비 저녁, 김○○ 부친상"}"></div>
+    <button class="btn fill" id="sv">저장</button>
+    ${isNew ? "" : `<button class="btn danger" id="dl">지우기</button>`}`, s => {
+    s.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { e.category = b.dataset.c; s.querySelectorAll("[data-c]").forEach(x => x.classList.toggle("on", x === b)); });
+    const am = s.querySelector("#am");
+    am.oninput = () => { const n = num(am.value); am.value = n ? n.toLocaleString("ko-KR") : ""; };
+    s.querySelector("#sv").onclick = () => {
+      const n = num(am.value);
+      if (!n) { am.closest(".field").classList.add("err"); return; }
+      Object.assign(e, { amount: n, date: s.querySelector("#dt").value || todayStr(), memo: s.querySelector("#mm").value.trim() });
+      if (isNew) c.ledger.push(e);
+      save(); closeSheet(); toast("저장했어요");
+    };
+    s.querySelector("#dl")?.addEventListener("click", () => { const i = c.ledger.indexOf(e); c.ledger.splice(i, 1); save(); closeSheet(); toast("지웠어요", () => { c.ledger.splice(i, 0, e); save(); refreshAll(); }); });
+  });
+}
+
+/* ---------- 특별회비 (경조사 등) ---------- */
+function editSpecial(c) {
+  openSheet("특별회비 만들기", `
+    <div class="field"><label>이름</label><input id="ti" placeholder="예: 김○○ 부친상 부의금"></div>
+    <div class="field"><label>1인 금액</label><div class="with-suf"><input id="am" inputmode="numeric"><span class="suf">원</span></div></div>
+    <button class="btn fill" id="sv">만들기</button>
+    <p class="help">걷은 돈은 회비 장부 수입으로 들어가요. 실제로 전달한 부의금 등은 <b>지출</b>로 따로 넣어 주세요.</p>`, s => {
+    const am = s.querySelector("#am");
+    am.oninput = () => { const n = num(am.value); am.value = n ? n.toLocaleString("ko-KR") : ""; };
+    s.querySelector("#sv").onclick = () => {
+      const t = s.querySelector("#ti").value.trim(), n = num(am.value);
+      if (!t || !n) { toast("이름과 금액을 넣어 주세요"); return; }
+      (c.specials ||= []).push({ id: uid(), title: t, amount: n, date: todayStr(), paid: {}, except: [] });
+      save(); closeSheet(); toast("만들었어요");
+    };
+  });
+}
+function openSpecial(c, sid) {
+  const sp = c.specials.find(x => x.id === sid);
+  const s = openSheet(sp.title, `<div id="sv"></div>`, null, () => draw());
+  const v = s.querySelector("#sv");
+  function draw() {
+    const ms = activeMembers(c), paid = ms.filter(m => sp.paid[m.id]).length;
+    v.innerHTML = `<div class="box"><div class="t">1인 ${won(sp.amount)} <span>${paid}명 · ${won(paid * sp.amount)}</span></div>
+      ${ms.map(m => { const ex = (sp.except || []).includes(m.id);
+        return `<div class="mem"><b>${esc(m.name)}</b><button class="tg off" data-x="${m.id}">${ex ? "제외됨" : "대상"}</button><button class="tg ${sp.paid[m.id] ? "on" : ex ? "off" : "due"}" data-p="${m.id}" ${ex ? "disabled" : ""}>${sp.paid[m.id] ? "💰 냄" : ex ? "－" : "안 냄"}</button></div>`; }).join("")}</div>
+      <p class="help">상주 본인처럼 걷지 않을 회원은 <b>대상</b>을 눌러 제외하세요.</p>
+      <button class="btn danger" id="dl">이 특별회비 지우기</button>`;
+    v.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { const k = b.dataset.p; sp.paid[k] = sp.paid[k] ? null : todayStr(); save(); draw(); });
+    v.querySelectorAll("[data-x]").forEach(b => b.onclick = () => { const k = b.dataset.x; sp.except = (sp.except || []).includes(k) ? sp.except.filter(x => x !== k) : [...(sp.except || []), k]; delete sp.paid[k]; save(); draw(); });
+    v.querySelector("#dl").onclick = () => confirmBox({ title: "이 특별회비를 지울까요?", msg: "걷은 기록도 함께 사라져요.", ok: "지우기", danger: true, onOk: () => { c.specials = c.specials.filter(x => x !== sp); save(); closeSheet(); } });
+  }
+  draw();
+}
+
+/* ---------- 모임 만들기·고치기 ---------- */
+const EMOJI = ["🎓", "🏔️", "📚", "⛳", "🍶", "🏸", "🎣", "⚽", "🙏", "🎤", "👨‍👩‍👧", "☕"];
+function editClub(c) {
+  const isNew = !c;
+  c = c || { id: uid(), name: "", emoji: "🎓", schedule: { kind: "month", nth: 2, wd: 6 }, time: "18:00", place: "", feeType: "meeting", fee: 20000, account: "", opening: 0, members: [], meetings: [], ledger: [], dues: {}, specials: [], feeStart: monthKey(todayStr()) };
+  const sch = { ...c.schedule };
+  openSheet(isNew ? "새 모임" : "모임 정보 고치기", `
+    <div class="field"><label>모임 이름</label><input id="nm" value="${esc(c.name)}" placeholder="예: 목포고 32회 동창회"></div>
+    <div class="chips" id="em">${EMOJI.map(e => `<button class="chip ${e === c.emoji ? "on" : ""}" data-e="${e}">${e}</button>`).join("")}</div>
+    <div class="sec">모임 주기</div>
+    <div class="chips" id="kind">${[["month", "매월 ○째 ○요일"], ["weeks", "○주마다"], ["manual", "직접 정함"]].map(([k, l]) => `<button class="chip" data-k="${k}">${l}</button>`).join("")}</div>
+    <div id="schBox"></div>
+    <div class="row2"><div class="field"><label>기본 시간</label><input id="tm" type="time" value="${esc(c.time)}"></div>
+      <div class="field"><label>기본 장소</label><input id="pl" value="${esc(c.place)}"></div></div>
+    <div class="sec">회비</div>
+    <div class="chips" id="ft">${Object.entries(FEE_TEXT).map(([k, l]) => `<button class="chip ${k === c.feeType ? "on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>
+    <div class="field"><label>회비 금액 (1인)</label><div class="with-suf"><input id="fe" inputmode="numeric" value="${c.fee ? c.fee.toLocaleString("ko-KR") : ""}"><span class="suf">원</span></div></div>
+    <div class="field" id="fsBox"><label>회비 걷기 시작한 달</label><input id="fs" type="month" value="${esc(c.feeStart || monthKey(todayStr()))}"></div>
+    <div class="field"><label>회비 계좌 (안내 문자에 들어가요)</label><input id="ac" value="${esc(c.account)}" placeholder="예: 국민 123-45-6789 (총무 홍길동)"></div>
+    <div class="field"><label>처음 잔액 (앱 쓰기 전 통장에 있던 돈)</label><div class="with-suf"><input id="op" inputmode="numeric" value="${c.opening ? c.opening.toLocaleString("ko-KR") : ""}"><span class="suf">원</span></div></div>
+    ${isNew ? `<div class="field"><label>회원 이름 (쉼표로 여러 명, 나중에 넣어도 돼요)</label><textarea id="ms" placeholder="김철수, 이영희, 박민수"></textarea></div>` : ""}
+    <button class="btn fill" id="sv">${isNew ? "모임 만들기" : "저장"}</button>`, s => {
+    let feeType = c.feeType;
+    const drawSch = () => {
+      s.querySelectorAll("[data-k]").forEach(b => b.classList.toggle("on", b.dataset.k === sch.kind));
+      const box = s.querySelector("#schBox");
+      const wdSel = `<select id="wd">${[...WD].map((w, i) => `<option value="${i}" ${i === sch.wd ? "selected" : ""}>${w}요일</option>`).join("")}</select>`;
+      box.innerHTML = sch.kind === "month" ? `<div class="row2"><div class="field"><label>몇째 주</label><select id="nth">${Object.entries(NTH).sort((a, b) => (+a[0] < 0) - (+b[0] < 0) || +a[0] - +b[0]).map(([k, l]) => `<option value="${k}" ${+k === sch.nth ? "selected" : ""}>${l}</option>`).join("")}</select></div><div class="field"><label>요일</label>${wdSel}</div></div>`
+        : sch.kind === "weeks" ? `<div class="row2"><div class="field"><label>몇 주마다</label><select id="wk">${[1, 2, 3, 4].map(n => `<option value="${n}" ${n === (sch.weeks || 1) ? "selected" : ""}>${n === 1 ? "매주" : `${n}주마다`}</option>`).join("")}</select></div><div class="field"><label>요일</label>${wdSel}</div></div>`
+        : `<p class="help">모임을 마칠 때마다 다음 날짜를 직접 정해요.</p>`;
+      box.querySelector("#wd")?.addEventListener("change", e => { sch.wd = +e.target.value; });
+      box.querySelector("#nth")?.addEventListener("change", e => { sch.nth = +e.target.value; });
+      box.querySelector("#wk")?.addEventListener("change", e => { sch.weeks = +e.target.value; });
+    };
+    s.querySelectorAll("[data-k]").forEach(b => b.onclick = () => { sch.kind = b.dataset.k; sch.wd ??= 6; sch.nth ??= 2; sch.weeks ??= 2; drawSch(); });
+    drawSch();
+    s.querySelectorAll("[data-e]").forEach(b => b.onclick = () => { s.querySelectorAll("[data-e]").forEach(x => x.classList.toggle("on", x === b)); c._emoji = b.dataset.e; });
+    const showFs = () => { s.querySelector("#fsBox").hidden = feeType === "meeting"; };
+    s.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { feeType = b.dataset.f; s.querySelectorAll("[data-f]").forEach(x => x.classList.toggle("on", x === b)); showFs(); });
+    showFs();
+    ["#fe", "#op"].forEach(sel => { const el = s.querySelector(sel); el.oninput = () => { const n = num(el.value); el.value = n ? n.toLocaleString("ko-KR") : ""; }; });
+    s.querySelector("#sv").onclick = () => {
+      const name = s.querySelector("#nm").value.trim();
+      if (!name) { s.querySelector("#nm").closest(".field").classList.add("err"); s.querySelector("#nm").focus(); return; }
+      const schChanged = JSON.stringify(sch) !== JSON.stringify(c.schedule);
+      Object.assign(c, { name, emoji: c._emoji || c.emoji, schedule: { ...sch }, time: s.querySelector("#tm").value, place: s.querySelector("#pl").value.trim(), feeType, fee: num(s.querySelector("#fe").value),
+        feeStart: s.querySelector("#fs").value || monthKey(todayStr()), account: s.querySelector("#ac").value.trim(), opening: num(s.querySelector("#op").value) });
+      delete c._emoji;
+      if (isNew || schChanged) c.nextDate = firstFrom(c.schedule);
+      if (isNew) {
+        for (const n of (s.querySelector("#ms")?.value || "").split(/[,\n]/).map(x => x.trim()).filter(Boolean)) c.members.push({ id: uid(), name: n, phone: "", joined: todayStr(), memo: "" });
+        state.clubs.push(c);
+      }
+      save(); closeSheet(); toast(isNew ? "모임을 만들었어요" : "저장했어요");
+      if (isNew) setTimeout(() => openClub(c.id, "mem"), 320);
+    };
+  });
+}
+function editTemplates(c) {
+  openSheet("안내 문자 문구", `
+    <div class="field"><label>모임 안내</label><textarea id="t1">${esc(c.noticeTemplate || T_NOTICE)}</textarea></div>
+    <div class="field"><label>미납 안내</label><textarea id="t2">${esc(c.dueTemplate || T_DUE)}</textarea></div>
+    <p class="help">{모임} {날짜} {시간} {장소} {회비안내} {이름} {금액} {내역} {계좌} 는 자동으로 바뀌어요.</p>
+    <button class="btn fill" id="sv">저장</button><button class="btn out" id="rs">처음 문구로</button>`, s => {
+    s.querySelector("#sv").onclick = () => { c.noticeTemplate = s.querySelector("#t1").value.trim(); c.dueTemplate = s.querySelector("#t2").value.trim(); save(); closeSheet(); toast("저장했어요"); };
+    s.querySelector("#rs").onclick = () => { s.querySelector("#t1").value = T_NOTICE; s.querySelector("#t2").value = T_DUE; };
+  });
+}
+
+/* ---------- 캘린더 (.ics): 휴대폰 캘린더가 하루 전에 알려 준다 ---------- */
+function addToCalendar(c, mt) {
+  const [h, m] = (mt.time || "19:00").split(":").map(Number);
+  const d = mt.date.replaceAll("-", ""), st = `${d}T${pad(h)}${pad(m)}00`, en = `${d}T${pad(Math.min(23, h + 2))}${pad(m)}00`;
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//club-web//KO", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+    `UID:${mt.id}@club-web`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`, `DTSTART:${st}`, `DTEND:${en}`,
+    `SUMMARY:${c.name} 모임`, `LOCATION:${(mt.place || "").replace(/[,;]/g, " ")}`, mt.fee ? `DESCRIPTION:회비 ${mt.fee}원` : "",
+    "BEGIN:VALARM", "TRIGGER:-P1D", "ACTION:DISPLAY", `DESCRIPTION:내일 ${c.name} 모임`, "END:VALARM", "END:VEVENT", "END:VCALENDAR"].filter(Boolean).join("\r\n");
+  shareOrDownload(new File([ics], `${c.name}-${mt.date}.ics`, { type: "text/calendar" }), "캘린더 파일을 열어 [추가]를 누르세요");
+}
+async function shareOrDownload(file, after) {
+  if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file] }); return; } catch (e) { if (e.name === "AbortError") return; } }
+  const url = URL.createObjectURL(file), a = document.createElement("a");
+  a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  if (after) toast(after);
+}
+
+/* ---------- 설정 (전체): 백업·불러오기·예시 ---------- */
+function openSettings() {
+  openSheet("설정", `
+    <div class="hint">모든 자료는 <b>이 휴대폰에만</b> 저장돼요. 휴대폰을 바꾸거나 총무가 바뀔 때는 백업 파일을 넘겨 주세요.</div>
+    <button class="btn fill" id="bk">💾 백업 파일 저장 (모든 모임)</button>
+    <button class="btn out" id="rs">📂 백업 파일 불러오기</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+    ${state.clubs.length ? "" : `<button class="btn tonal" id="smp">🧪 예시 모임 넣어 둘러보기</button>`}
+    <button class="btn out" id="how">📲 홈 화면에 추가하는 방법</button>
+    <p class="help">${storageOk ? "저장 상태: 정상" : "⚠️ 저장이 안 되고 있어요. 시크릿 모드인지 확인해 주세요."}</p>`, s => {
+    s.querySelector("#bk").onclick = () => {
+      const d = todayStr().replaceAll("-", "");
+      shareOrDownload(new File([JSON.stringify({ app: "club-web", savedAt: new Date().toISOString(), ...state }, null, 1)], `우리모임-백업-${d}.json`, { type: "application/json" }), "백업 파일을 저장했어요");
+    };
+    s.querySelector("#rs").onclick = () => s.querySelector("#file").click();
+    s.querySelector("#file").onchange = e => {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const j = JSON.parse(r.result);
+          if (!Array.isArray(j.clubs)) throw 0;
+          confirmBox({ title: "백업을 불러올까요?", msg: `모임 ${j.clubs.length}개가 들어 있어요. 지금 자료는 백업 내용으로 바뀌어요.`, ok: "불러오기",
+            onOk: () => { state = { clubs: j.clubs }; save(); closeSheet(); toast("불러왔어요"); } });
+        } catch { toast("우리 모임 백업 파일이 아니에요"); }
+      };
+      r.readAsText(f);
+    };
+    s.querySelector("#smp")?.addEventListener("click", () => { addSamples(); closeSheet(); toast("예시 모임을 넣었어요"); });
+    s.querySelector("#how").onclick = openInstallHow;
+  });
+}
+function openInstallHow() {
+  openSheet("홈 화면에 추가", `
+    <div class="box"><div class="t">🍎 아이폰</div><ol class="steps"><li>사파리로 이 주소를 열어요</li><li>아래쪽 <b>공유</b> 버튼(네모에 ↑)</li><li><b>홈 화면에 추가</b> → <b>추가</b></li></ol></div>
+    <div class="box"><div class="t">🤖 안드로이드</div><ol class="steps"><li>크롬으로 이 주소를 열어요</li><li>오른쪽 위 <b>⋮</b></li><li><b>홈 화면에 추가</b> 또는 <b>앱 설치</b></li></ol></div>`);
+}
+function addSamples() {
+  const t = todayStr(), mk = monthKey(t);
+  const mk1 = (name, emoji, schedule, feeType, fee, names, place) => {
+    const c = { id: uid(), sample: true, name, emoji, schedule, time: "18:30", place, feeType, fee, account: "○○은행 123-456-789 (총무)", opening: 300000, members: names.map(n => ({ id: uid(), name: n, phone: "010-0000-0000", joined: addDays(t, -120), memo: "" })), meetings: [], ledger: [], dues: {}, specials: [], feeStart: mk };
+    c.nextDate = firstFrom(schedule);
+    return c;
+  };
+  const a = mk1("목포고 32회 동창회", "🎓", { kind: "month", nth: 2, wd: 6 }, "meeting", 30000, ["김철수", "이영희", "박민수", "최지은", "정대호", "한미정", "오상훈"], "○○갈비");
+  const past = addDays(t, -20), pm = meetingOn(a, past);
+  a.members.forEach((m, i) => { if (i !== 3) pm.att[m.id] = true; if (i !== 3 && i !== 2) pm.paid[m.id] = past; });
+  pm.done = true; a.ledger.push({ id: uid(), date: past, kind: "out", category: "식비", amount: 142000, memo: "○○갈비 저녁", meetingId: pm.id }, { id: uid(), date: addDays(t, -10), kind: "in", category: "찬조금", amount: 50000, memo: "이영희" });
+  const b = mk1("북한산 산악회", "🏔️", { kind: "weeks", weeks: 2, wd: 2 }, "month", 10000, ["정대호", "윤혜진", "김태호", "송지민"], "구파발역");
+  b.dues[mk] = { [b.members[0].id]: t, [b.members[1].id]: t };
+  state.clubs.push(a, b);
+  save();
+}
+
+/* ---------- 시작 ---------- */
+load();
+$("#fab").onclick = () => editClub();
+$("#btnSettings").onclick = openSettings;
+$("#btnInstallHow").onclick = openInstallHow;
+$("#btnClearSamples").onclick = () => confirmBox({ title: "예시 모임을 지울까요?", ok: "지우기", danger: true, onOk: () => { state.clubs = state.clubs.filter(c => !c.sample); save(); renderHome(); } });
+const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+$("#btnInstallClose").onclick = () => { $("#installBanner").hidden = true; try { localStorage.setItem("club.hideInstall", "1"); } catch {} };
+try { $("#installBanner").hidden = standalone() || localStorage.getItem("club.hideInstall") === "1"; } catch { $("#installBanner").hidden = standalone(); }
+renderHome();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
